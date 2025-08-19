@@ -38,6 +38,10 @@ def create_db_with_samples():
         db.session.bulk_save_objects(samples)
         db.session.commit()
 
+# ✅ Ensure DB is initialized at import (works on Render/Gunicorn too)
+with app.app_context():
+    create_db_with_samples()
+
 # --------------------
 # Resources / Routes
 # --------------------
@@ -98,6 +102,9 @@ class UserResource(Resource):
         db.session.commit()
         return {"status": 200, "message": "User deleted"}, 200
 
+# --------------------
+# Home route
+# --------------------
 @app.route("/")
 def home():
     return {
@@ -111,11 +118,13 @@ def home():
             "DELETE /users/<id>": "Delete user"
         }
     }
+
 # register routes
 api.add_resource(UsersList, "/users")
 api.add_resource(UserResource, "/users/<int:id>")
 
+# --------------------
+# Local run
+# --------------------
 if __name__ == "__main__":
-    with app.app_context():
-        create_db_with_samples()
     app.run(debug=True)
